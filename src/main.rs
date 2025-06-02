@@ -1,17 +1,31 @@
 mod args;
 mod database;
 mod routers;
+#[cfg(feature = "sqlite_db")]
+mod entities;
 
 use axum::Router;
+
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = args::parse_args()?;
-    tracing_subscriber::fmt::init();
-    
+    tracing_subscriber::fmt().init();
+
+    tracing::info!("Args: {:#?}", args);
+    tracing::info!("Current dir: {}", std::env::current_dir()?.display());
+
+    #[cfg(not(feature = "sqlite_db"))]
     let db = database::mock::MockBase::new();
-    
-    let app = 
+
+    #[cfg(feature = "sqlite_db")]
+    let db =
+        database::sqlite::Sqlite::new(args.filename)
+            .await?;
+
+
+
+    let app =
         Router::new()
             .merge(routers::static_files::static_paths())
             .merge(routers::msgs::msgs(db));

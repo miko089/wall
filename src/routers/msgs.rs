@@ -28,10 +28,10 @@ async fn send_msg<T: Database>(
     let db = state.db.clone();
     tracing::info!("send_msg: {:?}", msg);
     match db.send_msg(msg).await {
-        Ok(()) => (StatusCode::OK, 
+        Ok(()) => (StatusCode::OK,
                    serde_json::json!({"msg": "ok"}).to_string())
             .into_response(),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, 
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR,
                    serde_json::json!({"err": e.to_string()}).to_string())
             .into_response()
     }

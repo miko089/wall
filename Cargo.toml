@@ -3,6 +3,9 @@ name = "wall"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+sqlite_db = ["sea-orm-macros", "sea-orm", "sea-orm/sqlx-sqlite"]
+
 [dependencies]
 anyhow = "1.0.98"
 async-trait = "0.1.88"
@@ -12,4 +15,6 @@ serde_json = "1.0.140"
 tokio = { version = "1.45.1", features = ["full"] }
 tower-http = { version = "0.6.4", features = ["full"] }
 tracing = "0.1.41"
-tracing-subscriber = "0.3.19"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+sea-orm = { version = "1.1.12", features = ["runtime-tokio"], optional = true }
+sea-orm-macros = { version = "1.1.12", optional = true }

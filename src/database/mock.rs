@@ -42,7 +42,7 @@ impl Database for MockBase{
             Before(before) => {
                 Ok(guard.iter()
                     .rev()
-                    .skip(guard.len() - before + 1)
+                    .skip(guard.len().saturating_sub(before) + 1)
                     .take(limit as usize)
                     .map(|x| x.clone())
                     .collect()
@@ -64,7 +64,7 @@ impl Database for MockBase{
             id,
             author: msg.author,
             content: msg.content,
-            timestamp: SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs() as u64,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs(),
         }));
         Ok(())
     }

@@ -1,4 +1,7 @@
+#[cfg(not(feature = "sqlite_db"))]
 pub mod mock;
+#[cfg(feature = "sqlite_db")]
+pub mod sqlite;
 
 use std::sync::Arc;
 use anyhow::Result;
@@ -18,6 +21,7 @@ pub struct ReceiveMsg {
     content: Arc<str>,
 }
 
+#[derive(Debug, Clone)]
 pub enum GetMsgs {
     Before(usize),
     After(usize),
