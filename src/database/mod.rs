@@ -1,0 +1,31 @@
+pub mod mock;
+
+use std::sync::Arc;
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Msg {
+    id: u32,
+    author: Arc<str>,
+    content: Arc<str>,
+    timestamp: u64,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ReceiveMsg {
+    author: Arc<str>,
+    content: Arc<str>,
+}
+
+pub enum GetMsgs {
+    Before(usize),
+    After(usize),
+}
+
+#[async_trait::async_trait]
+pub trait Database: Clone + Send + Sync + 'static {
+    async fn get_msgs(&self, count: GetMsgs, limit: u32) -> Result<Vec<Arc<Msg>>>;
+    async fn send_msg(&self, msg: ReceiveMsg) -> Result<()>;
+    async fn last_msg(&self) -> Result<u32>;
+}

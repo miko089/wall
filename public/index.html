@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <title>Pastel Wall</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+<header>
+    <h1>Wall</h1>
+    <form id="msg-form" autocomplete="off">
+        <input
+                id="author"
+                type="text"
+                placeholder="Твой ник"
+                required
+                maxlength="20"
+        />
+        <textarea
+                id="content"
+                placeholder=""
+                required
+        ></textarea>
+        <div class="meta">
+            <span id="counter"></span>
+            <button type="submit">Отправить</button>
+        </div>
+    </form>
+</header>
+
+<main id="messages"></main>
+
+<div id="sentinel"></div>
+
+<div id="toast" hidden></div>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>

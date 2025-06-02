@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <title>Куда это мы?</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+        body {
+            display: grid;
+            place-items: center;
+            text-align: center;
+            background: radial-gradient(
+                    circle at 20% 30%,
+                    var(--accent) 0%,
+                    var(--accent-3) 35%,
+                    var(--bg) 100%
+            );
+        }
+
+        .oops h1 {
+            font-size: clamp(4rem, 25vw, 12rem);
+            line-height: 0.9;
+            background: linear-gradient(
+                    135deg,
+                    var(--accent-2) 0%,
+                    var(--accent) 30%,
+                    var(--accent-3) 70%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .oops p {
+            font-size: 1.2rem;
+            margin: 1rem 0 2rem;
+            opacity: 0.85;
+        }
+
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(-6px);
+            }
+            50% {
+                transform: translateY(6px);
+            }
+        }
+
+        .oops a {
+            display: inline-block;
+            padding: 0.7rem 1.4rem;
+            background: var(--accent-3);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            transition: transform 0.1s;
+        }
+
+        .oops a:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+<div class="oops">
+    <h1>404</h1>
+    <p>Кажется, ты свернул не туда.<br />Вернёмся к стене?</p>
+    <a href="/">«&nbsp;К стенке, там классно&nbsp;»</a>
+</div>
+</body>
+</html>
