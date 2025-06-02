@@ -13,8 +13,21 @@ tokio + tower + serde + anyhow + im tired and it's 3:25 now
 idk, for now it saves msgs in ram as vec. When I will
 implement something smarter, it will be cool, I promise!
 
+## Usage
+```bash
+git clone <repolink>
+
+# will work with mock_db
+cargo run
+
+# will work with sqlite_db
+touch db.sqlite # or any other name 
+cargo run --features "sqlite_db"
+```
+Also you can pass env vars: PORT and DB_FILENAME
+
 ## TBD
-- [ ] storage which is adequate to a problem 
+- [x] storage which is adequate to a problem 
 - [ ] integrations (implement a trait and, for 
 each message, get a thread calling your very useful func)
   - [ ] telegram channel posting as an example

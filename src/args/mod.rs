@@ -1,5 +1,9 @@
+
+#[derive(Debug)]
 pub struct Args {
     pub port: u16,
+    #[cfg(feature = "sqlite_db")]
+    pub filename: String,
 }
 
 pub fn parse_args() -> anyhow::Result<Args> {
@@ -7,5 +11,8 @@ pub fn parse_args() -> anyhow::Result<Args> {
         port: std::env::var("PORT")
             .unwrap_or("8080".to_string())
             .parse()?,
+        #[cfg(feature = "sqlite_db")]
+        filename: std::env::var("DB_FILENAME")
+            .unwrap_or("db.sqlite".to_string()),
     })
 }
