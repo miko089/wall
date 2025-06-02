@@ -24,5 +24,5 @@ expected even for five people)
 
 ## LICENSE
 I've visited https://choosealicense.com/, and they told me
-to pick MIT, I guess. So, read it and use this code if you want
+to pick GNU Public License, I guess. So, read it and use this code if you want
 as license tell you..?
