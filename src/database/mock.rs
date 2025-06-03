@@ -54,12 +54,6 @@ impl Database for MockBase{
     async fn send_msg(&self, msg: ReceiveMsg) -> Result<()> {
         let mut guard = self.base.write().unwrap();
         let id = guard.len() as u32 + 1;
-        if msg.author.len() > 20 {
-            return Err(anyhow::anyhow!("Author name too long"));
-        }
-        if msg.content.len() > 250 {
-            return Err(anyhow::anyhow!("Content too long"));
-        }
         guard.push(Arc::new(Msg {
             id,
             author: msg.author,

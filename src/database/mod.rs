@@ -21,6 +21,21 @@ pub struct ReceiveMsg {
     content: Arc<str>,
 }
 
+impl ReceiveMsg {
+    pub fn check_valid(&self) -> Result<()> {
+        if self.author.is_empty() || self.content.is_empty() {
+            return Err(anyhow::anyhow!("Invalid message"));
+        }
+        if self.author.len() > 20 {
+            return Err(anyhow::anyhow!("Author name too long"));
+        }
+        if self.content.len() > 250 {
+            return Err(anyhow::anyhow!("Content too long"));
+        }
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum GetMsgs {
     Before(usize),

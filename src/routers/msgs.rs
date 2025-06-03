@@ -110,6 +110,10 @@ async fn send_msg<T: Database>(
 
     let db = state.db.clone();
     tracing::info!("send_msg: {:?}", msg);
+    if let Err(e) = msg.check_valid() {
+        return (StatusCode::BAD_REQUEST, 
+                serde_json::json!({"err": e.to_string()}).to_string()).into_response();
+    }
     match db.send_msg(msg).await {
         Ok(()) => (StatusCode::OK,
                    serde_json::json!({"msg": "ok"}).to_string())
