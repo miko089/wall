@@ -31,7 +31,7 @@ Also you can pass env vars: PORT and DB_FILENAME
 - [ ] integrations (implement a trait and, for 
 each message, get a thread calling your very useful func)
   - [ ] telegram channel posting as an example
-- [ ] rate limiting (or it'll be more chaotic, then I 
+- [x] rate limiting (or it'll be more chaotic, then I 
 expected even for five people)
 - [ ] flake.nix
 
