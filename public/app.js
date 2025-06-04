@@ -1,7 +1,12 @@
 (() => {
     "use strict";
 
-    const API     = Object.freeze({ FETCH: "/get_msgs", POST: "/send_msg", LAST: "/last_msg" });
+    const API = Object.freeze({
+        FETCH: "/get_msgs",
+        POST: "/send_msg",
+        LAST: "/last_msg",
+        GIT_INFO: "/git_info"
+    });
     const CHAR_LIMIT    = 250;
     const PAGE_SIZE     = 20;
     const POLL_INTERVAL = 5_000;
@@ -51,27 +56,111 @@
         }
     }
 
-    /* ========= UI ========= */
-    class Toast {
-        #el;
-        #onClick;
-        constructor(el, onClick) {
-            this.#el = el;
-            this.#onClick = onClick;
-            this.#el.addEventListener("click", () => {
-                this.hide();
-                this.#onClick?.();
-            });
-            this.#el.addEventListener("click", () => this.hide()); }
-        show(msg, isErr = false) { this.#el.textContent = msg; this.#el.classList.toggle("error", isErr); this.#el.hidden = false; }
-        hide() { this.#el.hidden = true; }
+    class GitInfo {
+        static async fetch() {
+            const res = await fetch(API.GIT_INFO);
+            if (!res.ok) throw new Error("Не могу полуичть информацию о репо");
+            return res.json();
+        }
+
+        static async init() {
+            const { commit_hash, repo_url } = await GitInfo.fetch();
+            document.getElementById("commit-hash").textContent = `Commit: ${commit_hash.slice(0, 7)}`;
+            const repoLink = document.getElementById("repo-link");
+            repoLink.href = repo_url;
+        }
     }
 
-    class Renderer {
+    /* ========= UI ========= */    class Toast {
+        #container;
+        #onClick;
+        #newMessageToast = null;
+        
+        constructor(container, onClick) {
+            this.#container = container;
+            this.#onClick = onClick;
+        }
+        
+        show(msg, isErr = false) {
+            // Для сообщений о новых сообщениях используем специальный тост
+            if (msg.includes("новых сообщений") || msg.includes("Новое сообщение")) {
+                if (this.#newMessageToast) {
+                    this.#newMessageToast.textContent = msg;
+                    return;
+                }
+
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = msg;
+                
+                toast.addEventListener('click', () => {
+                    this.hide(toast);
+                    this.#newMessageToast = null;
+                    this.#onClick?.();
+                });
+                
+                this.#container.appendChild(toast);
+                this.#newMessageToast = toast;
+                return;
+            }
+
+            // Для ошибок и других сообщений
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (isErr ? ' error' : '');
+            toast.textContent = msg;
+            
+            toast.addEventListener('click', () => {
+                this.hide(toast);
+            });
+            
+            this.#container.appendChild(toast);
+            
+            if (isErr) {
+                setTimeout(() => this.hide(toast), 5000);
+            }
+        }
+        
+        hide(toast) {
+            toast.classList.add('hiding');
+            toast.addEventListener('animationend', () => {
+                toast.remove();
+                if (this.#newMessageToast === toast) {
+                    this.#newMessageToast = null;
+                }
+            }, { once: true });
+        }
+    }    class Renderer {
         #list;
-        constructor(listEl) { this.#list = listEl; }
-        prepend(msg) { this.#list.prepend(this.#tpl(msg)); }
-        append (msg) { this.#list.append (this.#tpl(msg)); }
+        
+        constructor(listEl) { 
+            this.#list = listEl;
+            const messages = Array.from(this.#list.children);
+            messages.forEach(msg => {
+                if (!msg.parentElement.classList.contains('message-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'message-wrapper';
+                    msg.parentNode.insertBefore(wrapper, msg);
+                    wrapper.appendChild(msg);
+                }
+            });
+        }
+        
+        prepend(msg) {
+            const el = this.#tpl(msg);
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message-wrapper';
+            wrapper.appendChild(el);
+            this.#list.prepend(wrapper);
+        }
+        
+        append(msg) {
+            const el = this.#tpl(msg);
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message-wrapper';
+            wrapper.appendChild(el);
+            this.#list.append(wrapper);
+        }
+
         #tpl({ id, author, content, timestamp }) {
             const div = document.createElement("div");
             div.className = "message";
@@ -94,18 +183,27 @@
         constructor() {
             const $ = id => document.getElementById(id);
             this.#renderer = new Renderer($("messages"));
-            this.#toast    = new Toast($("toast"), () => this.#fetchNewest());
-            this.#author   = $("author");
-            this.#content  = $("content");
-            this.#counter  = $("counter");
+            this.#toast = new Toast(document.querySelector(".toast-container"), () => this.#fetchNewest());
+            this.#author = $("author");
+            this.#content = $("content");
+            this.#counter = $("counter");
 
-            $("msg-form").addEventListener("submit", e => this.#onSubmit(e));
-            this.#content.addEventListener("input", () => this.#updateCounter());
+            // auto-resize for textarea
+            const autoResize = () => {
+                this.#content.style.height = 'auto';
+                this.#content.style.height = this.#content.scrollHeight + 'px';
+            };
+            
+            this.#content.addEventListener("input", () => {
+                this.#updateCounter();
+                autoResize();
+            });
             this.#updateCounter();
-
+            autoResize();
+            GitInfo.init();
+            $("msg-form").addEventListener("submit", e => this.#onSubmit(e));
             this.#observer = new IntersectionObserver(e => this.#onIntersect(e[0]));
             this.#observer.observe($("sentinel"));
-
             this.#boot().catch(console.error);
         }
 
@@ -160,12 +258,16 @@
                     this.#state.oldest ??= msgs[0].id;
                 }
             } catch (err) { this.#toast.show(err.message, true); }
-        }
-
-        async #pollLast() {
+        }        async #pollLast() {
             try {
-                if ((await ChatAPI.lastId()) > (this.#state.newest ?? 0))
-                    this.#toast.show("Новое сообщение! Кликни, чтобы обновить.");
+                const lastId = await ChatAPI.lastId();
+                if (lastId > (this.#state.newest ?? 0)) {
+                    const diff = lastId - (this.#state.newest ?? 0);
+                    const message = diff === 1 
+                        ? "Новое сообщение! Кликни, чтобы обновить."
+                        : `${diff} новых сообщений! Кликни, чтобы обновить.`;
+                    this.#toast.show(message);
+                }
             } catch {/* silent */ }
         }
     }

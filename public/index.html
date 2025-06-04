@@ -10,6 +10,10 @@
 <body>
 <header>
     <h1>Wall</h1>
+    <div class="git-info">
+        <a id="repo-link" href="#" target="_blank">View on GitHub</a>
+        <span id="commit-hash">Loading...</span>
+    </div>
     <form id="msg-form" autocomplete="off">
         <input
                 id="author"
@@ -34,7 +38,7 @@
 
 <div id="sentinel"></div>
 
-<div id="toast" hidden></div>
+<div class="toast-container"></div>
 
 <script src="app.js" type="module"></script>
 </body>

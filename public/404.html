@@ -12,12 +12,6 @@
             display: grid;
             place-items: center;
             text-align: center;
-            background: radial-gradient(
-                    circle at 20% 30%,
-                    var(--accent) 0%,
-                    var(--accent-3) 35%,
-                    var(--bg) 100%
-            );
         }
 
         .oops h1 {
@@ -29,7 +23,7 @@
                     var(--accent) 30%,
                     var(--accent-3) 70%
             );
-            -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: float 6s ease-in-out infinite;
         }
@@ -53,13 +47,13 @@
         .oops a {
             display: inline-block;
             padding: 0.7rem 1.4rem;
-            background: var(--accent-3);
+            background: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 30%, var(--accent-3) 70%);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             text-decoration: none;
-            color: var(--text);
             font-weight: 600;
             transition: transform 0.1s;
+            color: var(--text);
         }
 
         .oops a:hover {
