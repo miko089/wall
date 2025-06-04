@@ -225,7 +225,7 @@
             try {
                 await ChatAPI.postMessage({ author, content });
                 this.#content.value = "";
-                this.#content.style.height = "auto"; // сбрасываем высоту text area
+                this.#content.style.height = "auto";
                 this.#updateCounter();
                 await this.#fetchNewest();
             } catch (err) { this.#toast.show(err.message, true); }
