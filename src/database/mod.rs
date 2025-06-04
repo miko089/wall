@@ -26,10 +26,10 @@ impl ReceiveMsg {
         if self.author.is_empty() || self.content.is_empty() {
             return Err(anyhow::anyhow!("Invalid message"));
         }
-        if self.author.len() > 20 {
+        if self.author.chars().count() > 20 {
             return Err(anyhow::anyhow!("Author name too long"));
         }
-        if self.content.len() > 250 {
+        if self.content.chars().count() > 250 {
             return Err(anyhow::anyhow!("Content too long"));
         }
         Ok(())
