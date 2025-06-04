@@ -17,6 +17,13 @@
             hour: "2-digit", minute: "2-digit", second: "2-digit",
         });
 
+    const escapeHtml = str => str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
     class ChatAPI {
         static async fetchBatch({ after = null, before = null, limit = PAGE_SIZE } = {}) {
             const url = `${API.FETCH}?${qs({ after, before, limit })}`;
@@ -69,8 +76,8 @@
             const div = document.createElement("div");
             div.className = "message";
             div.innerHTML = `
-        <div class="head">${author}</div>
-        <div class="body">${content}</div>
+        <div class="head">${escapeHtml(author)}</div>
+        <div class="body">${escapeHtml(content)}</div>
         <time datetime="${timestamp}">${fmtDate(timestamp)}</time>
       `;
             return div;
