@@ -15,6 +15,7 @@ pub fn parse_args() -> anyhow::Result<Args> {
         #[cfg(feature = "sqlite_db")]
         filename: std::env::var("DB_FILENAME")
             .unwrap_or("db.sqlite".to_string()),
-        repo_url: std::env::var("REPO_URL").ok(),
+        repo_url: std::env::var("REPO_URL")
+            .unwrap_or("https://github.com/miko089/wall".to_string()),
     })
 }
