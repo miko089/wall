@@ -24,11 +24,11 @@ async fn main() -> anyhow::Result<()> {
             .await?;
 
 
-
     let app =
         Router::new()
             .merge(routers::static_files::static_paths())
-            .merge(routers::msgs::msgs(db));
+            .merge(routers::msgs::msgs(db))
+            .merge(routers::git_info::git_info(args.repo_url));
 
     let listener  = tokio::net::TcpListener::bind(("0.0.0.0", args.port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);

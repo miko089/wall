@@ -4,6 +4,7 @@ pub struct Args {
     pub port: u16,
     #[cfg(feature = "sqlite_db")]
     pub filename: String,
+    pub repo_url: Option<String>,
 }
 
 pub fn parse_args() -> anyhow::Result<Args> {
@@ -14,5 +15,6 @@ pub fn parse_args() -> anyhow::Result<Args> {
         #[cfg(feature = "sqlite_db")]
         filename: std::env::var("DB_FILENAME")
             .unwrap_or("db.sqlite".to_string()),
+        repo_url: std::env::var("REPO_URL").ok(),
     })
 }
