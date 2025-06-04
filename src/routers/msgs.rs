@@ -92,6 +92,12 @@ async fn send_msg<T: Database>(
 ) -> Response {
     let client_ip = get_client_ip(&headers, Some(&ConnectInfo(addr)));
     tracing::info!("Request from IP: {}", client_ip);
+
+    tracing::info!("send_msg: {:?}", msg);
+    if let Err(e) = msg.check_valid() {
+        return (StatusCode::BAD_REQUEST,
+                serde_json::json!({"err": e.to_string()}).to_string()).into_response();
+    }
     
     let is_limited = {
         let mut rate_limiter = state.rate_limiter.lock().await;
@@ -109,11 +115,6 @@ async fn send_msg<T: Database>(
     }
 
     let db = state.db.clone();
-    tracing::info!("send_msg: {:?}", msg);
-    if let Err(e) = msg.check_valid() {
-        return (StatusCode::BAD_REQUEST, 
-                serde_json::json!({"err": e.to_string()}).to_string()).into_response();
-    }
     match db.send_msg(msg).await {
         Ok(()) => (StatusCode::OK,
                    serde_json::json!({"msg": "ok"}).to_string())
