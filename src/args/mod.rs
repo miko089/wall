@@ -4,7 +4,7 @@ pub struct Args {
     pub port: u16,
     #[cfg(feature = "sqlite_db")]
     pub filename: String,
-    pub repo_url: Option<String>,
+    pub repo_url: String,
 }
 
 pub fn parse_args() -> anyhow::Result<Args> {
@@ -19,3 +19,4 @@ pub fn parse_args() -> anyhow::Result<Args> {
             .unwrap_or("https://github.com/miko089/wall".to_string()),
     })
 }
+

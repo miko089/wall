@@ -2,6 +2,7 @@ use axum::{Router, routing::get, Json};
 use serde::Serialize;
 use std::process::Command;
 use std::sync::Arc;
+use anyhow::{anyhow, Result};
 
 #[derive(Serialize)]
 pub struct GitInfo {
@@ -10,32 +11,31 @@ pub struct GitInfo {
 }
 
 pub struct GitService {
-    repo_url: Option<String>,
+    repo_url: String,
 }
 
 impl GitService {
-    pub fn new(repo_url: Option<String>) -> Self {
+    pub fn new(repo_url: String) -> Self {
         Self { repo_url }
     }
 
-    fn get_remote_url() -> Option<String> {
+    fn get_remote_url() -> Result<String> {
         let output = Command::new("git")
             .args(["config", "--get", "remote.origin.url"])
-            .output()
-            .ok()?;
+            .output()?;
 
-        let url = String::from_utf8(output.stdout).ok()?;
+        let url = String::from_utf8(output.stdout)?;
         let url = url.trim();
 
         // Convert SSH URLs to HTTPS URLs
         if url.starts_with("git@github.com:") {
-            Some(url
+            Ok(url
                 .replace("git@github.com:", "https://github.com/")
                 .replace(".git", ""))
         } else if url.starts_with("https://") {
-            Some(url.replace(".git", "").to_string())
+            Ok(url.replace(".git", "").to_string())
         } else {
-            None
+            Err(anyhow!("Invalid remote URL: {}", url))
         }
     }
 
@@ -48,15 +48,16 @@ impl GitService {
             .map(|hash| hash.trim().to_string())
             .unwrap_or_default();
 
-        let repo_url = self
-            .repo_url
-            .clone()
-            .or_else(GitService::get_remote_url)
-            .unwrap_or_default();
-
-        GitInfo {
-            commit_hash,
-            repo_url,
+        if self.repo_url.len() == 0 {
+            GitInfo {
+                commit_hash,
+                repo_url: GitService::get_remote_url().unwrap_or_default()
+            }
+        } else {
+            GitInfo {
+                commit_hash,
+                repo_url: self.repo_url.clone()
+            }
         }
     }
 }
@@ -67,7 +68,7 @@ async fn get_git_info(
     Json(service.get_info().await)
 }
 
-pub fn git_info(repo_url: Option<String>) -> Router {
+pub fn git_info(repo_url: String) -> Router {
     let service = Arc::new(GitService::new(repo_url));
     
     Router::new()
