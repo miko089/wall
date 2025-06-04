@@ -16,11 +16,14 @@
         .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
         .join("&");
 
-    const fmtDate = iso =>
-        new Date(iso*1000).toLocaleString("ru-RU", {
+    const fmtDate = iso => {
+        const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        return new Date(iso * 1000).toLocaleString("ru-RU", {
+            timeZone: userTimeZone,
             year: "numeric", month: "2-digit", day: "2-digit",
             hour: "2-digit", minute: "2-digit", second: "2-digit",
         });
+    };
 
     const escapeHtml = str => str
         .replace(/&/g, "&amp;")
