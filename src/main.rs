@@ -3,8 +3,11 @@ mod database;
 mod routers;
 #[cfg(feature = "sqlite_db")]
 mod entities;
+mod integration;
+mod utils;
 
 use axum::Router;
+use std::sync::Arc;
 
 
 #[tokio::main]
@@ -23,11 +26,18 @@ async fn main() -> anyhow::Result<()> {
         database::sqlite::Sqlite::new(args.filename)
             .await?;
 
+    let telegram = Arc::new(integration::Telegram::new(
+        args.tg_token,
+        args.tg_chat_id,
+    ));
+    
+    let integrations: Arc<[Arc<dyn integration::Integration>]> = 
+        Arc::new([telegram]);
 
     let app =
         Router::new()
             .merge(routers::static_files::static_paths())
-            .merge(routers::msgs::msgs(db))
+            .merge(routers::msgs::msgs(db, integrations))
             .merge(routers::git_info::git_info(args.repo_url));
 
     let listener  = tokio::net::TcpListener::bind(("0.0.0.0", args.port)).await?;

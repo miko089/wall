@@ -10,6 +10,7 @@ use axum::http::{StatusCode, HeaderMap};
 use tokio::sync::Mutex;
 use crate::database::{Database, ReceiveMsg};
 use crate::database::GetMsgs::{After, Before};
+use crate::integration::Integration;
 
 #[derive(Deserialize)]
 struct Pagination {
@@ -57,6 +58,7 @@ impl RateLimiter {
 struct AppState<T: Database> {
     db: Arc<T>,
     rate_limiter: Arc<Mutex<RateLimiter>>,
+    integrations: Arc<[Arc<dyn Integration>]>,
 }
 
 
@@ -113,12 +115,18 @@ async fn send_msg<T: Database>(
             }).to_string()
         ).into_response();
     }
-
+    
     let db = state.db.clone();
+    let cloned_msg = msg.clone();
     match db.send_msg(msg).await {
-        Ok(()) => (StatusCode::OK,
+        Ok(()) => {
+            for integration in state.integrations.iter() {
+                std::thread::spawn(integration.integrate(cloned_msg.clone()));
+            }
+            (StatusCode::OK,
                    serde_json::json!({"msg": "ok"}).to_string())
-            .into_response(),
+            .into_response()
+        },
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR,
                    serde_json::json!({"err": e.to_string()}).to_string())
             .into_response()
@@ -170,10 +178,11 @@ async fn last_msg<T: Database>(
 }
 
 
-pub fn msgs<T: Database>(db: T) -> Router {
+pub fn msgs<T: Database>(db: T, integrations: Arc<[Arc<dyn Integration>]>) -> Router {
     let state = AppState {
         db: Arc::new(db),
-        rate_limiter: Arc::new(Mutex::new(RateLimiter::new(2, 60))), 
+        rate_limiter: Arc::new(Mutex::new(RateLimiter::new(2, 60))),
+        integrations,
     };
     Router::new()
         .route("/get_msgs", get(get_msgs))

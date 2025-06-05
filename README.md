@@ -28,9 +28,9 @@ Also you can pass env vars: PORT and DB_FILENAME
 
 ## TBD
 - [x] storage which is adequate to a problem 
-- [ ] integrations (implement a trait and, for 
+- [x] integrations (implement a trait and, for 
 each message, get a thread calling your very useful func)
-  - [ ] telegram channel posting as an example
+  - [x] telegram channel posting as an example
 - [x] rate limiting (or it'll be more chaotic, then I 
 expected even for five people)
 - [ ] flake.nix
