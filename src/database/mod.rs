@@ -17,8 +17,8 @@ pub struct Msg {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ReceiveMsg {
-    author: Arc<str>,
-    content: Arc<str>,
+    pub author: Arc<str>,
+    pub content: Arc<str>,
 }
 
 impl ReceiveMsg {
