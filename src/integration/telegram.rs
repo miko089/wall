@@ -9,8 +9,8 @@ pub struct Telegram {
 }
 
 impl Telegram {
-    pub fn new(token: String, chat_id: String) -> Self {
-        Self { token, chat_id }
+    pub fn new() -> Self {
+        Self { token: "".to_string(), chat_id: "".to_string() }
     }
 }
 
@@ -36,5 +36,12 @@ impl Integration for Telegram {
             Ok(_) => {}
             Err(e) => tracing::error!("Failed to send a message to Telegram: {}", e),
         })
+    }
+
+    fn parse_args(&mut self) -> anyhow::Result<()> {
+        self.token = std::env::var("TG_TOKEN")?;
+        self.chat_id = std::env::var("TG_CHAT_ID")?;
+
+        Ok(())
     }
 }

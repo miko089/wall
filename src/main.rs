@@ -9,7 +9,6 @@ mod utils;
 use axum::Router;
 use std::sync::Arc;
 
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = args::parse_args()?;
@@ -26,13 +25,23 @@ async fn main() -> anyhow::Result<()> {
         database::sqlite::Sqlite::new(args.filename)
             .await?;
 
-    let telegram = Arc::new(integration::Telegram::new(
-        args.tg_token,
-        args.tg_chat_id,
-    ));
-    
-    let integrations: Arc<[Arc<dyn integration::Integration>]> = 
-        Arc::new([telegram]);
+    let mut integrations: Vec<Box<dyn integration::Integration>> =
+            vec![
+                #[cfg(feature = "integration_tg")]
+                Box::new(integration::Telegram::new())
+            ];
+
+    for i in integrations.iter_mut() {
+        i.parse_args()?;
+    }
+
+    let integrations = Arc::from(
+        integrations
+            .into_iter()
+            .map(|x| Arc::from(x))
+            .collect::<Vec<Arc<dyn integration::Integration>>>().as_slice()
+    );
+
 
     let app =
         Router::new()

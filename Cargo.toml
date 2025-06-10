@@ -5,6 +5,7 @@ edition = "2024"
 
 [features]
 sqlite_db = ["sea-orm-macros", "sea-orm", "sea-orm/sqlx-sqlite"]
+integration_tg = ["ureq"]
 
 [dependencies]
 anyhow = "1.0.98"
@@ -18,4 +19,4 @@ tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 sea-orm = { version = "1.1.12", features = ["runtime-tokio"], optional = true }
 sea-orm-macros = { version = "1.1.12", optional = true }
-ureq = { version = "3.0.11", features = ["json"] }
+ureq = { version = "3.0.11", features = ["json"], optional = true }
