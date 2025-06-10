@@ -68,7 +68,9 @@
 
         static async init() {
             const { commit_hash, repo_url } = await GitInfo.fetch();
-            document.getElementById("commit-hash").textContent = `Commit: ${commit_hash.slice(0, 7)}`;
+            const commitLink = document.getElementById("commit-hash-link");
+            commitLink.textContent = `Commit: ${commit_hash.slice(0, 7)}`;
+            commitLink.href = `https://github.com/SemyonHoyrish/wall/commit/${commit_hash}`;
             const repoLink = document.getElementById("repo-link");
             repoLink.href = repo_url;
         }
